@@ -3,326 +3,178 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stranded Signal Studio — Signal-Driven Alpha</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Barlow+Condensed:wght@300;400;700&display=swap" rel="stylesheet">
+<title>Stranded Signal Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 :root {
-  --void:     #060608;
-  --charcoal: #0F1115;
-  --graphite: #1A1E25;
-  --steel:    #323743;
-  --silver:   #595F6D;
-  --white:    #F5F7FA;
-  --yellow:   #C99A0E;
-  --yellow2:  #E8B422;
+  --void:   #060608;
+  --steel:  #323743;
+  --silver: #595F6D;
+  --white:  #F5F7FA;
+  --yellow: #C99A0E;
+  --border: rgba(201,154,14,0.12);
 }
+html, body { height: 100%; overflow: hidden; }
+body { background: var(--void); color: var(--white); font-family: 'IBM Plex Mono', monospace; }
 
-html, body {
-  height: 100%;
-  background: var(--void);
-  color: var(--white);
-  font-family: 'Barlow Condensed', sans-serif;
-  overflow: hidden;
+/* BG — hero image fills viewport */
+.bg {
+  position: fixed; inset: 0; z-index: 0;
 }
-
-/* ── FULL BLEED HERO IMAGE ── */
-.hero-bg {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+.bg img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center center;
+  opacity: 0.9;
+  animation: zoom 30s ease-in-out infinite alternate;
 }
-.hero-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 40%;
-  opacity: 0.75;
-  animation: slowZoom 30s ease-in-out infinite alternate;
-}
-@keyframes slowZoom {
-  from { transform: scale(1); }
-  to   { transform: scale(1.06); }
-}
-
-/* Dark overlays for text legibility */
-.hero-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
+@keyframes zoom { from { transform: scale(1); } to { transform: scale(1.04); } }
+/* gradient so footer/nav are readable */
+.bg::after {
+  content: ''; position: absolute; inset: 0;
   background:
-    linear-gradient(to right, rgba(6,6,8,0.92) 0%, rgba(6,6,8,0.6) 50%, rgba(6,6,8,0.2) 100%),
-    linear-gradient(to top, rgba(6,6,8,0.95) 0%, transparent 40%),
-    linear-gradient(to bottom, rgba(6,6,8,0.7) 0%, transparent 25%);
+    linear-gradient(to bottom, rgba(6,6,8,0.35) 0%, transparent 20%, transparent 65%, rgba(6,6,8,0.92) 100%),
+    linear-gradient(to right, rgba(6,6,8,0.3) 0%, transparent 50%);
 }
 
-/* Noise texture */
-.hero-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-/* Diagonal grid line overlay — like the reference */
-.grid-lines {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-}
-.grid-lines svg {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  inset: 0;
-}
-
-/* Corner marks */
-.c { position: fixed; width: 28px; height: 28px; z-index: 10; }
+/* Corners */
+.c { position: fixed; width: 24px; height: 24px; z-index: 10; }
 .c::before, .c::after { content: ''; position: absolute; background: rgba(201,154,14,0.3); }
-.ctL { top: 18px; left: 18px; }
-.ctL::before { top:0; left:0; width:1px; height:16px; }
-.ctL::after  { top:0; left:0; width:16px; height:1px; }
-.cbR { bottom: 18px; right: 18px; }
-.cbR::before { bottom:0; right:0; width:1px; height:16px; }
-.cbR::after  { bottom:0; right:0; width:16px; height:1px; }
+.ctL { top: 16px; left: 16px; }
+.ctL::before { top:0; left:0; width:1px; height:14px; }
+.ctL::after  { top:0; left:0; width:14px; height:1px; }
+.cbR { bottom: 16px; right: 16px; }
+.cbR::before { bottom:0; right:0; width:1px; height:14px; }
+.cbR::after  { bottom:0; right:0; width:14px; height:1px; }
 
-/* ── LAYOUT ── */
+/* Layout */
 .wrapper {
-  position: relative;
-  z-index: 2;
+  position: relative; z-index: 2;
   height: 100vh;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 0 56px;
+  grid-template-rows: 1fr auto;
 }
 
-/* NAV */
-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 26px 0 22px;
-  border-bottom: 1px solid rgba(201,154,14,0.1);
-}
-.logo img { height: 50px; width: auto; display: block; }
-.nav-right { display: flex; align-items: center; gap: 28px; }
-.nav-url {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px; color: var(--silver); letter-spacing: 0.14em;
-}
-.status {
-  display: flex; align-items: center; gap: 7px;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px; color: var(--silver); letter-spacing: 0.1em;
-}
-.dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--yellow);
-  animation: pulse 3s ease-in-out infinite;
-}
-@keyframes pulse {
-  0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(201,154,14,0.5); }
-  50%      { opacity:0.4; box-shadow:0 0 0 5px rgba(201,154,14,0); }
-}
-
-/* HERO TEXT */
-.hero {
+/* MAIN — sits at bottom over image */
+.main {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 0 0 52px;
-  max-width: 100%;
+  padding: 0 56px 48px;
+  gap: 28px;
 }
 
-.eyebrow {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px; color: var(--yellow);
-  letter-spacing: 0.22em; text-transform: uppercase;
-  margin-bottom: 20px;
-  display: flex; align-items: center; gap: 12px;
-  opacity: 0; animation: fadeUp 1s ease 0.3s forwards;
+/* Login button */
+.login-wrap {
+  opacity: 0; animation: fadeUp 0.9s ease 0.3s forwards;
 }
-.eyebrow::before {
-  content: ''; width: 22px; height: 1px;
-  background: var(--yellow); display: inline-block;
+.login-label {
+  font-size: 9px; color: var(--silver);
+  letter-spacing: 0.2em; text-transform: uppercase;
+  margin-bottom: 10px;
 }
+.login-btn {
+  display: inline-flex; align-items: center; gap: 14px;
+  background: rgba(6,6,8,0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  padding: 16px 28px;
+  text-decoration: none; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  width: fit-content;
+}
+.login-btn:hover { border-color: rgba(201,154,14,0.4); background: rgba(15,17,21,0.88); }
+.login-btn:hover .lb-text { color: var(--yellow); }
+.lb-icon { opacity: 0.55; flex-shrink: 0; }
+.lb-text {
+  font-size: 11px; color: var(--white);
+  letter-spacing: 0.18em; text-transform: uppercase;
+  transition: color 0.2s;
+}
+.lb-arrow { font-size: 13px; color: var(--yellow); opacity: 0.6; margin-left: 4px; }
 
-/* Big editorial headline */
-.headline-wrap {
-  margin-bottom: 32px;
-  opacity: 0; animation: fadeUp 1s ease 0.5s forwards;
+/* Contact row */
+.contact-row {
+  display: flex; align-items: center; gap: 20px;
+  opacity: 0; animation: fadeUp 0.9s ease 0.55s forwards;
 }
-.hl {
-  display: block;
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 700;
-  font-size: clamp(64px, 9vw, 130px);
-  line-height: 0.92;
-  letter-spacing: -0.02em;
-  text-transform: uppercase;
-}
-.hl-white { color: var(--white); }
-.hl-dim   { color: rgba(245,247,250,0.25); font-weight: 300; }
-.hl-gold  { color: var(--yellow); }
-
-/* Bottom row — body + pillars side by side */
-.bottom-row {
-  display: flex;
-  align-items: flex-end;
-  gap: 64px;
-  opacity: 0;
-  animation: fadeUp 1s ease 0.75s forwards;
-}
-
-.body-text {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px; line-height: 2;
-  color: var(--silver);
-  max-width: 360px;
-  flex-shrink: 0;
-  border-left: 1px solid rgba(201,154,14,0.25);
-  padding-left: 18px;
-}
-
-.pillars {
-  display: flex; gap: 0;
-  border: 1px solid rgba(50,55,67,0.6);
-  background: rgba(6,6,8,0.5);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-}
-.pillar {
-  display: flex; flex-direction: column; gap: 4px;
-  padding: 14px 22px;
-  border-right: 1px solid rgba(50,55,67,0.5);
-}
-.pillar:last-child { border-right: none; }
-.p-num { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--yellow); letter-spacing: 0.1em; opacity: 0.6; }
-.p-label { font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; color: var(--white); letter-spacing: 0.1em; text-transform: uppercase; }
-.p-sub { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--silver); }
+.cr { display: flex; flex-direction: column; gap: 2px; }
+.cr-l { font-size: 8px; color: var(--silver); letter-spacing: 0.18em; text-transform: uppercase; }
+.cr-v { font-size: 11px; color: rgba(245,247,250,0.75); letter-spacing: 0.04em; }
+.cr-v a { color: inherit; text-decoration: none; }
+.cr-v a:hover { color: var(--yellow); }
+.cr-div { width: 1px; height: 22px; background: var(--steel); opacity: 0.35; }
 
 /* FOOTER */
 footer {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 0 24px;
-  border-top: 1px solid rgba(201,154,14,0.07);
-  opacity: 0; animation: fadeUp 1s ease 1s forwards;
+  padding: 14px 56px 20px;
+  border-top: 1px solid var(--border);
+  opacity: 0; animation: fadeUp 0.9s ease 0.75s forwards;
 }
-.footer-left { display: flex; align-items: center; gap: 5px; }
-.ftag { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--steel); letter-spacing: 0.12em; text-transform: uppercase; }
-.fslash { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--yellow); opacity: 0.3; padding: 0 5px; }
-.footer-right { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--steel); letter-spacing: 0.1em; text-align: right; line-height: 1.9; }
+.f-left { display: flex; align-items: center; gap: 4px; }
+.ft { font-size: 9px; color: var(--steel); letter-spacing: 0.1em; text-transform: uppercase; }
+.fs { font-size: 9px; color: var(--yellow); opacity: 0.22; padding: 0 4px; }
+.f-right { font-size: 9px; color: var(--steel); letter-spacing: 0.1em; text-align: right; line-height: 1.9; }
 
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(16px); }
-  to   { opacity:1; transform:translateY(0); }
-}
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
-@media (max-width: 768px) {
-  .wrapper { padding: 0 24px; }
-  .nav-url { display: none; }
-  .bottom-row { flex-direction: column; align-items: flex-start; gap: 28px; }
-  .pillars { flex-wrap: wrap; }
-  .pillar { border-right: none; border-bottom: 1px solid rgba(50,55,67,0.5); }
-  .hl { font-size: clamp(48px, 12vw, 80px); }
+@media (max-width: 640px) {
+  .main { padding: 0 24px 40px; }
+  footer { padding-left: 24px; padding-right: 24px; }
+  .f-left { display: none; }
 }
 </style>
 </head>
 <body>
 
-<!-- FULL BLEED HERO -->
-<div class="hero-bg">
-  <img src="sss-hero.png" alt="">
-</div>
-
-<!-- Diagonal grid lines overlay -->
-<div class="grid-lines">
-  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-    <line x1="0" y1="900" x2="600" y2="0"   stroke="rgba(201,154,14,0.06)" stroke-width="1"/>
-    <line x1="200" y1="900" x2="800" y2="0"  stroke="rgba(201,154,14,0.04)" stroke-width="1"/>
-    <line x1="-200" y1="900" x2="400" y2="0" stroke="rgba(201,154,14,0.03)" stroke-width="1"/>
-    <line x1="1440" y1="0" x2="900" y2="900" stroke="rgba(201,154,14,0.04)" stroke-width="1"/>
-  </svg>
-</div>
-
+<div class="bg"><img src="sss-hero-logo.png" alt="Stranded Signal Studio"></div>
 <div class="c ctL"></div>
 <div class="c cbR"></div>
 
 <div class="wrapper">
 
-  <nav>
-    <a class="logo" href="#"><img src="sss-logo.png" alt="Stranded Signal Studio"></a>
-    <div class="nav-right">
-      <span class="nav-url">STRANDEDSIGNAL.COM</span>
-      <div class="status"><div class="dot"></div>PRIVATE</div>
-    </div>
-  </nav>
-
-  <div class="hero">
-    <div class="eyebrow">Technology-Backed Capital Operator</div>
-
-    <div class="headline-wrap">
-      <span class="hl hl-white">MARKET</span>
-      <span class="hl hl-dim">INEFFICIENCY.</span>
-      <span class="hl hl-gold">STRANDED SIGNAL.</span>
+  <div class="main">
+    <div class="login-wrap">
+      <div class="login-label">Secure Portal Access</div>
+      <a class="login-btn" href="#">
+        <svg class="lb-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="1.5" y="6.5" width="13" height="8" rx="0.5" stroke="#C99A0E" stroke-width="1.2"/>
+          <path d="M4.5 6.5V4.5a3.5 3.5 0 017 0v2" stroke="#C99A0E" stroke-width="1.2"/>
+          <circle cx="8" cy="10.5" r="1" fill="#C99A0E"/>
+        </svg>
+        <span class="lb-text">Login to Signal Stack</span>
+        <span class="lb-arrow">→</span>
+      </a>
     </div>
 
-    <div class="bottom-row">
-      <p class="body-text">
-        We identify underutilized data,<br>
-        mispriced inefficiency, and<br>
-        disconnected operational intelligence.<br>
-        We transform it into asymmetric returns.
-      </p>
-      <div class="pillars">
-        <div class="pillar">
-          <span class="p-num">01</span>
-          <span class="p-label">Find Signal</span>
-          <span class="p-sub">Where others don't look.</span>
-        </div>
-        <div class="pillar">
-          <span class="p-num">02</span>
-          <span class="p-label">Extract Intelligence</span>
-          <span class="p-sub">Raw data into advantage.</span>
-        </div>
-        <div class="pillar">
-          <span class="p-num">03</span>
-          <span class="p-label">Deploy Capital</span>
-          <span class="p-sub">Through specialized entities.</span>
-        </div>
-        <div class="pillar">
-          <span class="p-num">04</span>
-          <span class="p-label">Compound Returns</span>
-          <span class="p-sub">Repeat. Scale. Outperform.</span>
-        </div>
+    <div class="contact-row">
+      <div class="cr">
+        <span class="cr-l">Contact</span>
+        <span class="cr-v"><a href="mailto:info@strandedsignal.com">info@strandedsignal.com</a></span>
+      </div>
+      <div class="cr-div"></div>
+      <div class="cr">
+        <span class="cr-l">Location</span>
+        <span class="cr-v">New York, NY</span>
       </div>
     </div>
   </div>
 
   <footer>
-    <div class="footer-left">
-      <span class="ftag">Focus the Signal</span>
-      <span class="fslash">//</span>
-      <span class="ftag">Compound Intelligence</span>
-      <span class="fslash">//</span>
-      <span class="ftag">Deploy Capital</span>
-      <span class="fslash">//</span>
-      <span class="ftag">Generate Asymmetric Returns</span>
+    <div class="f-left">
+      <span class="ft">Focus the Signal</span><span class="fs">//</span>
+      <span class="ft">Compound Intelligence</span><span class="fs">//</span>
+      <span class="ft">Deploy Capital</span><span class="fs">//</span>
+      <span class="ft">Generate Asymmetric Returns</span>
     </div>
-    <div class="footer-right">
+    <div class="f-right">
       © 2026 Stranded Signal Studio, LLC<br>
       Confidential — Not for Distribution
     </div>
   </footer>
 
 </div>
-
 </body>
 </html>
