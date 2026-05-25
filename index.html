@@ -21,14 +21,16 @@ body { background: var(--void); color: var(--white); font-family: 'IBM Plex Mono
 /* BG — hero image fills viewport */
 .bg {
   position: fixed; inset: 0; z-index: 0;
+  overflow: hidden;
 }
 .bg img {
   width: 100%; height: 100%;
   object-fit: cover; object-position: center center;
   opacity: 0.9;
+  transform-origin: center center;
   animation: zoom 30s ease-in-out infinite alternate;
 }
-@keyframes zoom { from { transform: scale(1); } to { transform: scale(1.04); } }
+@keyframes zoom { from { transform: scale(1.02); } to { transform: scale(1.06); } }
 /* gradient so footer/nav are readable */
 .bg::after {
   content: ''; position: absolute; inset: 0;
